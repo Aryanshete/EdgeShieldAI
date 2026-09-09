@@ -1,0 +1,20 @@
+{
+  "frames_processed": 480,
+  "total_elapsed_seconds": 47.17,
+  "processing_fps": 10.18,
+  "yolo_mean_ms": 54.64,
+  "yolo_p95_ms": 45.84,
+  "tracking_mean_ms": 40.36,
+  "tracking_p95_ms": 45.29,
+  "event_processing_mean_ms": 0.11,
+  "event_processing_p95_ms": 0.14,
+  "context_synthesis_ms": 0.37,
+  "risk_evaluation_ms": 0.03,
+  "reasoning_ms": 0.05,
+  "end_to_end_decision_ms": 47167.56,
+  "memory_peak_mb": 82.7,
+  "backend": "CPU",
+  "device": "cpu",
+  "model": "yolov8n.pt",
+  "timestamp": "2026-09-09 15:28:49"
+}
