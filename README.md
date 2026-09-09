@@ -89,15 +89,23 @@ EdgeShield AI enforces a strict multi-stage **Sense → Structure → Score → 
 
 ## Demo
 
-To run the interactive demonstration:
+![EdgeShield AI Live Operations Dashboard](docs/screenshots/dashboard_live.png)
+
+### Live Streamlit Operations Interface
 1. Launch the Streamlit dashboard:
    ```powershell
    .\.venv\Scripts\streamlit run app.py
    ```
 2. Open `http://localhost:8501` in your browser.
 3. Select **Demo Video (Restricted Intrusion)** or upload custom footage.
-4. Select a **Scenario Profile** (e.g., Scenario 1 — Restricted Area Intrusion).
+4. Select a **Scenario Profile** (e.g., Scenario 1 — Restricted Area Intrusion, Scenario 2 — Sensitive Area Loitering).
 5. Click **🚀 Start Analysis** to observe real-time bounding boxes, live threat scoring, chronological event generation, and Llama 3.2 reasoning.
+
+### Hardware Benchmarks & Privacy Verification
+![Pipeline Architecture & Benchmarks](docs/screenshots/architecture_benchmarks.png)
+
+### Incident Management & Audit Reports
+![Incidents & Audit Reports](docs/screenshots/incidents_audit.png)
 
 ---
 
