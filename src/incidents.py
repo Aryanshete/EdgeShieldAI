@@ -93,7 +93,7 @@ def generate_report(incident: Incident) -> str:
     events_lines = "\n".join(f"1. `{ev}`" for ev in incident.events) if incident.events else "None recorded"
     subject_str = f"Anonymous Track #{incident.track_id:02d}" if incident.track_id is not None else "Unassigned"
 
-    return f"""# EdgeShield AI — Security Incident Report
+    return f"""# EdgeShield AI - Security Incident Report
 
 **Incident ID:** `{incident.incident_id}`  
 **Status:** `{incident.status}`  
@@ -133,6 +133,261 @@ The following objective observations were verified by the EdgeShield vision pipe
 
 ---
 *Report generated automatically by EdgeShield AI Edge Security Platform. All observations are based on deterministic event verification without facial recognition.*
+"""
+
+
+REPORT_HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Incident Audit - __INCIDENT_ID__</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #1e293b;
+    background: #f8fafc;
+    margin: 0;
+    padding: 2rem;
+  }
+  .report-card {
+    max-width: 820px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: __BADGE_COLOR__;
+    background: __BADGE_BG__;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    background: #f1f5f9;
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .meta-item strong {
+    display: block;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .meta-item span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  h2 {
+    font-size: 1.1rem;
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.4rem;
+    margin-top: 1.75rem;
+  }
+  .action-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
+    color: #991b1b;
+    margin-top: 1rem;
+  }
+  .print-btn {
+    float: right;
+    padding: 0.5rem 1rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .print-btn:hover { background: #1d4ed8; }
+  @media print {
+    .print-btn { display: none; }
+    body { background: white; padding: 0; }
+    .report-card { border: none; box-shadow: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="report-card">
+  <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  <div class="header">
+    <div>
+      <h1 class="title">EdgeShield AI Security Incident Report</h1>
+      <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">Automated Edge Surveillance Audit Record</div>
+    </div>
+  </div>
+
+  <div class="meta-grid">
+    <div class="meta-item">
+      <strong>Incident Identifier</strong>
+      <span>__INCIDENT_ID__</span>
+    </div>
+    <div class="meta-item">
+      <strong>Threat Severity Level</strong>
+      <span class="badge">__RISK_LEVEL__ (Score: __RISK_SCORE__/100)</span>
+    </div>
+    <div class="meta-item">
+      <strong>Location / Zone</strong>
+      <span>__LOCATION__</span>
+    </div>
+    <div class="meta-item">
+      <strong>Lifecycle Status</strong>
+      <span>__STATUS__</span>
+    </div>
+    <div class="meta-item">
+      <strong>Timestamp Observed</strong>
+      <span>__TIMESTAMP__</span>
+    </div>
+    <div class="meta-item">
+      <strong>Tracked Subject</strong>
+      <span>__SUBJECT__</span>
+    </div>
+  </div>
+
+  <h2>1. Executive Summary</h2>
+  <p>__SUMMARY__</p>
+
+  <h2>2. Grounded Physical Evidence</h2>
+  <ul>__EVIDENCE_HTML__</ul>
+
+  <h2>3. Chronological Event Sequence</h2>
+  <ol>__EVENTS_HTML__</ol>
+
+  <h2>4. Contextual AI Interpretation</h2>
+  <p>__EXPLANATION__</p>
+
+  <h2>5. Recommended Operator Response</h2>
+  <div class="action-box">
+    <strong>Action Required:</strong> __RECOMMENDED_ACTION__
+  </div>
+
+  <div style="margin-top: 2.5rem; font-size: 0.75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 0.75rem;">
+    Report generated on __NOW__ by EdgeShield AI Edge Security Platform. Strictly anonymous edge video processing without facial recognition.
+  </div>
+</div>
+</body>
+</html>"""
+
+
+def generate_html_report(incident: Incident) -> str:
+    """Generate a self-contained, responsive, printable HTML security incident report."""
+    evidence_html = "".join(f"<li>{item}</li>" for item in incident.evidence) if incident.evidence else "<li>None recorded</li>"
+    events_html = "".join(f"<li><code>{ev}</code></li>" for ev in incident.events) if incident.events else "<li>None recorded</li>"
+    subject_str = f"Anonymous Track #{incident.track_id:02d}" if incident.track_id is not None else "Unassigned"
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    level = incident.risk_level.upper()
+    if level == "CRITICAL":
+        color = "#ef4444"
+        bg = "#451a1a"
+    elif level == "HIGH":
+        color = "#f97316"
+        bg = "#431407"
+    elif level == "MEDIUM":
+        color = "#eab308"
+        bg = "#422006"
+    else:
+        color = "#10b981"
+        bg = "#064e3b"
+
+    html = REPORT_HTML_TEMPLATE
+    html = html.replace("__INCIDENT_ID__", incident.incident_id)
+    html = html.replace("__BADGE_COLOR__", color)
+    html = html.replace("__BADGE_BG__", bg)
+    html = html.replace("__RISK_LEVEL__", incident.risk_level)
+    html = html.replace("__RISK_SCORE__", str(incident.risk_score))
+    html = html.replace("__LOCATION__", incident.location)
+    html = html.replace("__STATUS__", incident.status)
+    html = html.replace("__TIMESTAMP__", incident.timestamp)
+    html = html.replace("__SUBJECT__", subject_str)
+    html = html.replace("__SUMMARY__", incident.summary or incident.explanation)
+    html = html.replace("__EVIDENCE_HTML__", evidence_html)
+    html = html.replace("__EVENTS_HTML__", events_html)
+    html = html.replace("__EXPLANATION__", incident.explanation)
+    html = html.replace("__RECOMMENDED_ACTION__", incident.recommended_action)
+    html = html.replace("__NOW__", now_str)
+    return html
+
+
+def generate_text_report(incident: Incident) -> str:
+    """Generate a clean ASCII plain text report readable directly in Notepad."""
+    evidence_lines = "\n".join(f"  * {item}" for item in incident.evidence) if incident.evidence else "  * None recorded"
+    events_lines = "\n".join(f"  {idx+1}. {ev}" for idx, ev in enumerate(incident.events)) if incident.events else "  None recorded"
+    subject_str = f"Anonymous Track #{incident.track_id:02d}" if incident.track_id is not None else "Unassigned"
+
+    return f"""================================================================================
+EDGESHIELD AI - SECURITY INCIDENT AUDIT REPORT
+================================================================================
+
+INCIDENT ID:      {incident.incident_id}
+STATUS:           {incident.status}
+SEVERITY LEVEL:   {incident.risk_level} (Deterministic Risk Score: {incident.risk_score}/100)
+GENERATED ON:     {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+--------------------------------------------------------------------------------
+1. OVERVIEW & METADATA
+--------------------------------------------------------------------------------
+Location / Zone:  {incident.location}
+Timestamp:        {incident.timestamp}
+Subject:          {subject_str}
+Summary:          {incident.summary or incident.explanation}
+
+--------------------------------------------------------------------------------
+2. PHYSICAL & SPATIAL EVIDENCE GROUNDING
+--------------------------------------------------------------------------------
+{evidence_lines}
+
+--------------------------------------------------------------------------------
+3. VERIFIED EVENT SEQUENCE
+--------------------------------------------------------------------------------
+{events_lines}
+
+--------------------------------------------------------------------------------
+4. CONTEXTUAL AI INTERPRETATION
+--------------------------------------------------------------------------------
+{incident.explanation}
+
+--------------------------------------------------------------------------------
+5. RECOMMENDED OPERATOR ACTION
+--------------------------------------------------------------------------------
+[ACTION REQUIRED]: {incident.recommended_action}
+
+================================================================================
+Report generated automatically by EdgeShield AI Edge Security Platform.
+Deterministic edge event verification without facial recognition.
+================================================================================
 """
 
 
@@ -258,3 +513,11 @@ class IncidentManager:
     def generate_report(self, incident: Incident) -> str:
         """Generate formatted Markdown audit report for the given incident."""
         return generate_report(incident)
+
+    def generate_html_report(self, incident: Incident) -> str:
+        """Generate self-contained printable HTML audit report for the given incident."""
+        return generate_html_report(incident)
+
+    def generate_text_report(self, incident: Incident) -> str:
+        """Generate clean ASCII plain text audit report for the given incident."""
+        return generate_text_report(incident)

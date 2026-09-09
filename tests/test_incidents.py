@@ -124,9 +124,26 @@ def test_generate_report(tmp_path: Path, sample_pipeline_data: tuple[SecurityCon
     incident = mgr.create_incident(ctx, assessment, reasoning)
 
     report = generate_report(incident)
-    assert "# EdgeShield AI — Security Incident Report" in report
+    assert "# EdgeShield AI - Security Incident Report" in report
     assert "`INC-2026-001`" in report
     assert "Server Room" in report
     assert "HIGH" in report
     assert "85/100" in report
     assert "Alert security personnel" in report
+
+
+def test_generate_html_and_text_reports(tmp_path: Path, sample_pipeline_data: tuple[SecurityContext, RiskAssessment, ReasoningOutput]) -> None:
+    ctx, assessment, reasoning = sample_pipeline_data
+    mgr = IncidentManager(storage_path=tmp_path / "dummy_html.json")
+    incident = mgr.create_incident(ctx, assessment, reasoning)
+
+    html = mgr.generate_html_report(incident)
+    assert "<!DOCTYPE html>" in html
+    assert "INC-2026-001" in html
+    assert "Server Room" in html
+    assert "Print / Save as PDF" in html
+
+    text = mgr.generate_text_report(incident)
+    assert "EDGESHIELD AI - SECURITY INCIDENT AUDIT REPORT" in text
+    assert "INCIDENT ID:      INC-2026-001" in text
+    assert "Server Room" in text

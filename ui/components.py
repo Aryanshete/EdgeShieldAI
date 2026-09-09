@@ -401,9 +401,9 @@ def render_incidents_view(manager: IncidentManager) -> None:
         return
 
     col_select, col_actions = st.columns([2, 1])
-    incident_options = [f"{inc.incident_id} — {inc.location} ({inc.risk_level}, Score: {inc.risk_score})" for inc in incidents]
+    incident_options = [f"{inc.incident_id} - {inc.location} ({inc.risk_level}, Score: {inc.risk_score})" for inc in incidents]
     selected_option = col_select.selectbox("Select Incident to Review", options=incident_options)
-    selected_id = selected_option.split(" — ")[0]
+    selected_id = selected_option.split(" - ")[0]
     incident = manager.get_incident(selected_id)
 
     if not incident:
@@ -421,14 +421,48 @@ def render_incidents_view(manager: IncidentManager) -> None:
             st.success(f"Status updated to {new_status}")
             st.rerun()
 
-    # Display Report Preview & Download Button
-    report_text = manager.generate_report(incident)
-    st.download_button(
-        label=f"📥 Download Audit Report ({incident.incident_id}.md)",
-        data=report_text,
-        file_name=f"{incident.incident_id}_report.md",
-        mime="text/markdown",
-    )
+    # Multi-format report export
+    st.markdown("**Download Official Incident Audit Report:**")
+    dcol1, dcol2, dcol3, dcol4 = st.columns(4)
+    with dcol1:
+        st.download_button(
+            label="🌐 Download HTML Report\n(Opens in Browser / PDF)",
+            data=manager.generate_html_report(incident),
+            file_name=f"{incident.incident_id}_audit_report.html",
+            mime="text/html",
+            use_container_width=True,
+            type="primary",
+            help="Opens automatically in any web browser with print-to-PDF formatting.",
+        )
+    with dcol2:
+        st.download_button(
+            label="📄 Download Plain Text\n(Opens in Notepad)",
+            data=manager.generate_text_report(incident),
+            file_name=f"{incident.incident_id}_audit_report.txt",
+            mime="text/plain",
+            use_container_width=True,
+            help="Opens instantly in Windows Notepad or any text editor.",
+        )
+    with dcol3:
+        st.download_button(
+            label="📝 Download Markdown\n(Documentation)",
+            data=manager.generate_report(incident),
+            file_name=f"{incident.incident_id}_report.md",
+            mime="text/markdown",
+            use_container_width=True,
+            help="Standard GitHub-flavored markdown format.",
+        )
+    with dcol4:
+        import json
+        st.download_button(
+            label="📊 Download JSON\n(SIEM / Machine Data)",
+            data=json.dumps(incident.as_dict(), indent=2),
+            file_name=f"{incident.incident_id}_data.json",
+            mime="application/json",
+            use_container_width=True,
+            help="Full structured incident schema for SIEM / SOC ingestion.",
+        )
 
-    with st.expander("📄 View Full Markdown Audit Report", expanded=True):
+    report_text = manager.generate_report(incident)
+    with st.expander("📄 View Full In-Dashboard Audit Report Preview", expanded=True):
         st.markdown(report_text)
