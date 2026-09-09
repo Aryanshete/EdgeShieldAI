@@ -16,6 +16,7 @@ Ultralytics/
 .DS_Store
 Thumbs.db
 scratch/
+*.log
 
 # Runtime output and large local video assets
 reports/*.json
