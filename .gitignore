@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments and local configuration
+.venv/
+venv/
+.env
+
+# Tooling and OS files
+.streamlit/secrets.toml
+Ultralytics/
+.DS_Store
+Thumbs.db
+scratch/
+
+# Runtime output and large local video assets
+reports/*.json
+!reports/performance.json
+reports/*.pdf
+reports/*.jpg
+reports/*.mp4
+videos/demo/*
+!videos/demo/.gitkeep
+models/*.pt
+!models/.gitkeep
+
+# Keep local incident/event state out of version control, while retaining the
+# empty directory through its placeholder.
+data/*.json
+!data/.gitkeep

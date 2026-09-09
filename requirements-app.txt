@@ -1,0 +1,11 @@
+# Framework-agnostic application packages.
+# The execution environment supplies PyTorch and torchvision: use requirements.txt
+# for local CPU development, or an AMD-supported ROCm PyTorch environment.
+ultralytics
+lap>=0.5.12
+opencv-python
+numpy
+streamlit
+pandas
+pillow
+pyyaml

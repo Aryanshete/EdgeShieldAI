@@ -1,0 +1,17 @@
+# Core runtime dependencies for the EdgeShield MVP.
+# Install a ROCm-specific PyTorch build separately when deploying on supported
+# AMD infrastructure; see docs/amd-rocm.md when that phase is implemented.
+torch
+torchvision
+ultralytics
+# ByteTrack's linear-assignment solver, required by Ultralytics tracking.
+lap>=0.5.12
+opencv-python
+numpy
+streamlit
+pandas
+pillow
+pyyaml
+
+# Test runner used by the detector unit tests.
+pytest

@@ -1,0 +1,15 @@
+# AMD-published ROCm 10 / PyTorch 2.13 image for Ubuntu 24.04 and Python 3.11.
+# Reconfirm this tag against AMD's current compatibility selector before a
+# production deployment.
+FROM rocm/pytorch:rocm10.0_ubuntu24.04_py3.11_pytorch_release_2.13.0
+
+WORKDIR /app
+
+COPY requirements-app.txt ./
+RUN pip install --no-cache-dir -r requirements-app.txt
+
+COPY . .
+
+# Validates the actual PyTorch/HIP runtime at container start. The deployment
+# command must pass the AMD GPU device, such as /dev/kfd on Linux.
+CMD ["python", "scripts/verify_rocm.py"]
