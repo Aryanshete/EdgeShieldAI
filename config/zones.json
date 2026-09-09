@@ -1,0 +1,38 @@
+{
+  "zones": [
+    {
+      "id": "server_room",
+      "name": "Server Room",
+      "type": "restricted",
+      "polygon": [
+        [450, 300],
+        [850, 300],
+        [850, 720],
+        [450, 720]
+      ],
+      "color": [0, 0, 220],
+      "authorized_hours": {
+        "start": "08:00",
+        "end": "18:00"
+      },
+      "description": "High-security server rack enclosure containing sensitive communications equipment."
+    },
+    {
+      "id": "entry_corridor",
+      "name": "Entry Corridor",
+      "type": "monitored",
+      "polygon": [
+        [100, 300],
+        [450, 300],
+        [450, 720],
+        [100, 720]
+      ],
+      "color": [0, 180, 255],
+      "authorized_hours": {
+        "start": "00:00",
+        "end": "23:59"
+      },
+      "description": "General access hallway connecting the outer corridor to the secure facility entry."
+    }
+  ]
+}
