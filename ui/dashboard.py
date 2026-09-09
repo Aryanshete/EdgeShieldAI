@@ -167,17 +167,8 @@ def render_dashboard() -> None:
 
         with col_threat:
             risk_placeholder = st.empty()
-            risk_placeholder.markdown(
-                f"""
-                <div class="card-container">
-                    <div class="card-header"><span>Threat Assessment</span><span>READY</span></div>
-                    <div class="risk-score-display"><span>{st.session_state.current_assessment.score}</span><span class="risk-max-scale">/ 100</span></div>
-                    <div class="risk-summary-text">{st.session_state.current_assessment.summary_label}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            render_risk_panel(st.session_state.current_assessment)
+            with risk_placeholder.container():
+                render_risk_panel(st.session_state.current_assessment)
 
         with col_video:
             st.markdown('<div class="card-header"><span>Visual Surveillance Feed</span><span>REAL-TIME PIPELINE</span></div>', unsafe_allow_html=True)
@@ -260,8 +251,11 @@ def render_dashboard() -> None:
                             assessment = st.session_state.risk_engine.evaluate_context(active_ctx)
                             reasoning = st.session_state.reasoning_agent.analyze(active_ctx, assessment)
 
-                            with col_threat:
+                            risk_placeholder.empty()
+                            with risk_placeholder.container():
                                 render_risk_panel(assessment)
+
+                            reasoning_placeholder.empty()
                             with reasoning_placeholder.container():
                                 render_reasoning_card(reasoning)
 
