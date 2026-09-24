@@ -4,7 +4,8 @@
 torch
 torchvision
 ultralytics
-# ByteTrack's linear-assignment solver, required by Ultralytics tracking.
+# ByteTrack's linear-assignment solver (lapx provides binary wheels for cloud)
+lapx>=0.5.5
 lap>=0.5.12
 opencv-python
 numpy
@@ -12,6 +13,7 @@ streamlit
 pandas
 pillow
 pyyaml
+onnxruntime
 
 # Test runner used by the detector unit tests.
 pytest

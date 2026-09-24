@@ -27,6 +27,7 @@ reports/*.jpg
 reports/*.mp4
 videos/demo/*
 !videos/demo/.gitkeep
+!videos/demo/intrusion_demo.mp4
 models/*.pt
 models/*.onnx
 !models/.gitkeep
