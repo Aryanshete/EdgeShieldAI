@@ -1,6 +1,6 @@
 # Core runtime dependencies for the EdgeShield MVP.
 # Install a ROCm-specific PyTorch build separately when deploying on supported
-# AMD infrastructure; see docs/amd-rocm.md when that phase is implemented.
+# AMD infrastructure; see docs/amd-rocm.md for ROCm acceleration setup.
 torch
 torchvision
 ultralytics

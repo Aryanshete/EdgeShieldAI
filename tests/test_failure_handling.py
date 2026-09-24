@@ -1,4 +1,4 @@
-"""Unit tests for Phase 16: Failure Handling and Operational Continuity."""
+"""Unit tests for failure handling and operational continuity."""
 
 import pytest
 from src.context import SecurityContext

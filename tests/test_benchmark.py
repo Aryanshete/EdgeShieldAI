@@ -1,4 +1,4 @@
-"""Unit tests for Phase 12 Performance Measurement and Benchmark tooling."""
+"""Unit tests for performance measurement and benchmark profiling."""
 
 from __future__ import annotations
 

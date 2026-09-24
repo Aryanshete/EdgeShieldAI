@@ -440,6 +440,11 @@ class IncidentManager:
         self.incidents.append(incident)
         self._persist()
 
+    def clear_incidents(self) -> None:
+        """Clear all stored incidents from memory and persistent disk."""
+        self.incidents = []
+        self._persist()
+
     def create_incident(
         self,
         context: SecurityContext | dict[str, Any],
@@ -449,9 +454,10 @@ class IncidentManager:
         incident_id: str | None = None,
     ) -> Incident:
         """Construct, register, and persist a new incident from pipeline outputs."""
-        ctx_dict = context.as_dict() if isinstance(context, SecurityContext) else dict(context)
-        risk_dict = assessment.as_dict() if isinstance(assessment, RiskAssessment) else dict(assessment)
-        reas_dict = reasoning.as_dict() if isinstance(reasoning, ReasoningOutput) else dict(reasoning)
+        ctx_dict = context.as_dict() if hasattr(context, "as_dict") else dict(context)
+        risk_dict = assessment.as_dict() if hasattr(assessment, "as_dict") else dict(assessment)
+        reas_dict = reasoning.as_dict() if hasattr(reasoning, "as_dict") else dict(reasoning)
+
 
         if not incident_id:
             existing_ids = [inc.incident_id for inc in self.incidents]

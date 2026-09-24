@@ -1,54 +1,70 @@
-# AMD / ROCm runtime
+# AMD ROCm™ & Ryzen™ AI Runtime Architecture
 
-## Current local status
+## 1. Truthful Runtime Detection
 
-The Phase 1 development machine is a Windows device with an NVIDIA GeForce RTX
-3050 Laptop GPU and a CPU-only PyTorch build (`torch.version.hip` is empty).
-It cannot provide a genuine ROCm result. EdgeShield therefore uses CPU locally
-and reports `backend: CPU`, never an AMD/ROCm claim.
+EdgeShield AI enforces strict hardware honesty:
+- **ROCm Active**: Requires both `torch.cuda.is_available() == True` and a non-empty `torch.version.hip`.
+- **Ryzen AI Active**: Requires ONNX Runtime with `VitisAIExecutionProvider` (AMD XDNA NPU).
+- **DirectML Active**: Requires `DmlExecutionProvider` targeting an AMD GPU/APU via DirectX 12.
+- **CUDA (Non-AMD)**: Identifies NVIDIA accelerators without fabricating AMD claims.
+- **CPU Reference**: Used whenever no compatible accelerator is present.
 
-`src/runtime.py` determines the backend from PyTorch runtime facts:
-
-- `ROCm` requires both `torch.cuda.is_available()` and a non-empty
-  `torch.version.hip` value.
-- `CUDA` identifies a non-ROCm PyTorch accelerator; it is not presented as AMD.
-- `CPU` is the fallback when no PyTorch accelerator is active.
-
-Run this check on every target environment:
-
+Run the verification probe in any environment:
 ```bash
 python scripts/verify_rocm.py
 ```
 
-It exits successfully only when AMD ROCm is actually active. It also prints the
-PyTorch, HIP, device, and backend facts that should be captured for the final
-demo and performance report.
+---
 
-## Target AMD deployment
+## 2. AMD GPU Configuration & Profiles (`config/amd_gpu.yaml`)
 
-Deploy the repository to an AMD GPU instance (for example, an AMD Developer
-Cloud allocation) that is supported by the selected ROCm release. Use AMD's
-current [PyTorch installation guide](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html)
-and compatibility matrix for the exact GPU, OS, Python, driver, and ROCm
-combination; those selections must be made for the actual instance.
+EdgeShield AI manages AMD GPU hardware targeting through `config/amd_gpu.yaml` and the `scripts/configure_amd_gpu.py` utility.
 
-For a Linux container deployment, `Dockerfile.rocm` starts from AMD's ROCm
-PyTorch image and installs only the framework-independent application packages.
-Build and run it on the AMD host with GPU devices exposed to the container:
+### Pre-Tuned Hardware Profiles
 
+| Profile Key | Target Hardware | Architecture | HSA Override GFX | FP16 Precision |
+|:---|:---|:---|:---:|:---:|
+| `instinct_mi300` | AMD Instinct™ MI300X / MI300A | CDNA™ 3 (gfx942) | `9.4.2` | Enabled |
+| `instinct_mi250` | AMD Instinct™ MI250X / MI250 / MI210 | CDNA™ 2 (gfx90a) | `9.0.a` | Enabled |
+| `radeon_rx7900` | AMD Radeon™ RX 7900 XTX / 7800 XT | RDNA™ 3 (gfx1100) | `11.0.0` | Enabled |
+| `radeon_rx6000` | AMD Radeon™ RX 6900 XT / 6800 XT | RDNA™ 2 (gfx1030) | `10.3.0` | Enabled |
+| `ryzen_ai_npu` | AMD Ryzen™ AI 300 / 8040 / 7040 | XDNA™ NPU | Native | NPU INT8/FP16 |
+| `auto` | Auto-detect optimal host settings | Auto | Auto | Enabled if GPU |
+
+### Switching Hardware Profiles
 ```bash
-docker build -f Dockerfile.rocm -t edgeshield-rocm .
-docker run --rm --device=/dev/kfd --device=/dev/dri --group-add video edgeshield-rocm
+# List all profiles
+python scripts/configure_amd_gpu.py --list
+
+# Switch to AMD Instinct MI300
+python scripts/configure_amd_gpu.py --set instinct_mi300
+
+# Switch to AMD Radeon RX 7900
+python scripts/configure_amd_gpu.py --set radeon_rx7900
+
+# Export environment variables for shell
+# Linux / Bash:
+eval $(python3 scripts/configure_amd_gpu.py --export-bash)
+# Windows PowerShell:
+python scripts/configure_amd_gpu.py --export-ps1 | Invoke-Expression
 ```
 
-The container's default command runs `scripts/verify_rocm.py`. Only after that
-check passes should model inference be run with the `cuda:0` device and the UI
-show AMD ROCm as active.
+---
 
-## Windows note
+## 3. Container & Cloud Deployment
 
-AMD currently documents Windows PyTorch support for a limited set of supported
-AMD Radeon and Ryzen hardware. It is not applicable to an NVIDIA GPU. Confirm
-the exact hardware and driver against AMD's
-[Windows compatibility matrix](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityrad/windows/windows_compatibility.html)
-before using a Windows target.
+### Docker Compose with AMD GPU Passthrough
+```bash
+# Export optimized ONNX model
+python scripts/export_amd_model.py
+
+# Launch container with /dev/kfd and /dev/dri device access
+docker compose -f docker-compose.rocm.yml up --build -d
+```
+
+### Automated Setup Scripts
+- `scripts/setup_rocm.sh`: Initializes AMD ROCm host, checks `/dev/kfd`, and installs drivers.
+- `scripts/deploy_amd.sh`: Builds container, probes hardware, and starts the SOC dashboard.
+- `scripts/benchmark_amd.py`: Benchmarks PyTorch and ONNX inference, generating `reports/performance_amd.md`.
+
+For in-depth deployment instructions, refer to [AMD Deployment Guide](file:///docs/amd_deployment_guide.md).

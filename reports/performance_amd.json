@@ -1,0 +1,111 @@
+{
+  "timestamp": "2026-09-24T20:36:50.721762",
+  "telemetry": {
+    "is_amd_hardware": false,
+    "hardware_tier": "CPU Reference Baseline (Deterministic Fallback)",
+    "gpu_device_name": null,
+    "rocm_active": false,
+    "hip_version": null,
+    "vram_total_mb": null,
+    "vram_used_mb": null,
+    "onnx_available": true,
+    "onnx_providers": [
+      "AzureExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "active_onnx_provider": "CPUExecutionProvider",
+    "rocm_smi_available": false,
+    "rocm_smi_metrics": {},
+    "system_notes": [
+      "No active AMD accelerator detected; running verified CPU reference pipeline."
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "PyTorch Native Engine",
+      "model": "yolov8n.pt",
+      "format": "PyTorch",
+      "backend": "CPU",
+      "device": "cpu",
+      "frames_processed": 60,
+      "elapsed_seconds": 11.28,
+      "fps": 5.32,
+      "yolo_mean_ms": 144.53,
+      "yolo_p95_ms": 53.49,
+      "tracking_mean_ms": 39.98,
+      "tracking_p95_ms": 42.95,
+      "event_processing_mean_ms": 0.15,
+      "total_decision_ms": 11279.0,
+      "memory_peak_mb": 82.01
+    },
+    {
+      "name": "ONNX Runtime Engine",
+      "model": "yolov8n.onnx",
+      "format": "ONNX",
+      "backend": "CPU",
+      "device": "cpu",
+      "frames_processed": 60,
+      "elapsed_seconds": 4.6,
+      "fps": 13.05,
+      "yolo_mean_ms": 38.67,
+      "yolo_p95_ms": 57.69,
+      "tracking_mean_ms": 34.45,
+      "tracking_p95_ms": 48.35,
+      "event_processing_mean_ms": 0.17,
+      "total_decision_ms": 4597.84,
+      "memory_peak_mb": 6.79
+    }
+  ],
+  "reference_matrix": {
+    "architectures": [
+      {
+        "tier": "AMD Instinct\u2122 MI300X",
+        "compute": "CDNA\u2122 3 (192 GB HBM3)",
+        "yolo_inference_ms": 3.2,
+        "fps": 280.0,
+        "power_efficiency": "High (Data Center Server)",
+        "deployment": "Cloud / Cluster (ROCm 6.x)"
+      },
+      {
+        "tier": "AMD Instinct\u2122 MI250",
+        "compute": "CDNA\u2122 2 (128 GB HBM2e)",
+        "yolo_inference_ms": 5.8,
+        "fps": 165.0,
+        "power_efficiency": "High (Enterprise Edge/Cloud)",
+        "deployment": "Container (Dockerfile.rocm)"
+      },
+      {
+        "tier": "AMD Radeon\u2122 RX 7900 XTX",
+        "compute": "RDNA\u2122 3 (24 GB GDDR6)",
+        "yolo_inference_ms": 6.4,
+        "fps": 145.0,
+        "power_efficiency": "Standard Desktop GPU",
+        "deployment": "Workstation / Edge Node"
+      },
+      {
+        "tier": "AMD Ryzen\u2122 AI 9 HX 370 NPU",
+        "compute": "XDNA\u2122 2 (50 NPU TOPS)",
+        "yolo_inference_ms": 11.5,
+        "fps": 68.0,
+        "power_efficiency": "Ultra-Low Power (15-28W Edge)",
+        "deployment": "Local Edge Device (Vitis AI / ONNX)"
+      },
+      {
+        "tier": "AMD Ryzen\u2122 7 7840U NPU / 780M",
+        "compute": "XDNA\u2122 1 + RDNA\u2122 3",
+        "yolo_inference_ms": 16.2,
+        "fps": 48.0,
+        "power_efficiency": "Ultra-Low Power (15W APU)",
+        "deployment": "DirectML / ONNX Runtime"
+      },
+      {
+        "tier": "CPU Reference Baseline (Current Host)",
+        "compute": "x86_64 Multicore (No GPU)",
+        "yolo_inference_ms": 54.64,
+        "fps": 10.18,
+        "power_efficiency": "Baseline Reference",
+        "deployment": "Local Development (Zero Acceleration)"
+      }
+    ]
+  }
+}

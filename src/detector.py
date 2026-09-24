@@ -22,6 +22,7 @@ from src.runtime import RuntimeStatus, get_runtime_status
 
 
 DEFAULT_MODEL_PATH = PROJECT_ROOT / "models" / "yolov8n.pt"
+DEFAULT_ONNX_PATH = PROJECT_ROOT / "models" / "yolov8n.onnx"
 PERSON_CLASS_NAME = "person"
 
 
@@ -58,50 +59,81 @@ class VideoDetectionSummary:
 
 
 class YOLODetector:
-    """Run YOLOv8 predictions and render their results onto OpenCV frames."""
+    """Run YOLOv8 predictions across PyTorch ROCm and ONNX Runtime backends."""
 
     def __init__(
         self,
-        model_path: str | Path = DEFAULT_MODEL_PATH,
+        model_path: str | Path | None = None,
         confidence_threshold: float = 0.25,
         device: str | None = None,
+        backend: str = "auto",
     ) -> None:
         if not 0.0 <= confidence_threshold <= 1.0:
             raise ValueError("confidence_threshold must be between 0.0 and 1.0")
 
-        self.model_path = Path(model_path)
+        self.runtime: RuntimeStatus = get_runtime_status()
+
+        # Resolve model path based on requested backend and available assets
+        if model_path is not None:
+            self.model_path = Path(model_path)
+        elif backend.lower() == "onnx" and DEFAULT_ONNX_PATH.is_file():
+            self.model_path = DEFAULT_ONNX_PATH
+        elif backend.lower() == "auto":
+            # Prefer ONNX if an AMD NPU or DirectML execution provider is present
+            has_amd_onnx = any(
+                p in self.runtime.onnx_providers
+                for p in ["VitisAIExecutionProvider", "ROCMExecutionProvider", "DmlExecutionProvider"]
+            )
+            if has_amd_onnx and DEFAULT_ONNX_PATH.is_file():
+                self.model_path = DEFAULT_ONNX_PATH
+            else:
+                self.model_path = DEFAULT_MODEL_PATH
+        else:
+            self.model_path = DEFAULT_MODEL_PATH
+
         self.model_path.parent.mkdir(parents=True, exist_ok=True)
         self.confidence_threshold = confidence_threshold
-        self.runtime: RuntimeStatus = get_runtime_status()
+
+        # Apply AMD GPU environment variables (HSA_OVERRIDE_GFX_VERSION, HIP_VISIBLE_DEVICES, etc.)
+        from src.amd_config import apply_amd_gpu_environment
+
+        apply_amd_gpu_environment()
+
         self.device = device or self.runtime.device
         self.model = YOLO(str(self.model_path))
         self.class_names: dict[int, str] = {
             int(index): str(name) for index, name in self.model.names.items()
         }
 
-    def runtime_info(self) -> dict[str, str | bool | None]:
+    def runtime_info(self) -> dict[str, Any]:
         """Return runtime facts for the dashboard and reproducibility records."""
+        is_onnx = self.model_path.suffix.lower() == ".onnx"
         return self.runtime.as_dict() | {
             "model": self.model_path.name,
             "model_path": str(self.model_path.resolve()),
+            "model_format": "ONNX" if is_onnx else "PyTorch",
             "inference_device": self.device,
+            "is_onnx_runtime": is_onnx,
         }
 
     def detect(self, frame: Any) -> list[dict[str, str | float | list[int]]]:
         """Detect COCO objects in one BGR OpenCV frame.
 
         The returned schema deliberately contains only visual model output;
-        interpretation belongs to later event and context phases.
+        interpretation is handled downstream by the event and context engines.
         """
         if frame is None or not hasattr(frame, "shape"):
             raise ValueError("frame must be a valid OpenCV image")
 
-        result = self.model.predict(
-            frame,
-            conf=self.confidence_threshold,
-            device=self.device,
-            verbose=False,
-        )[0]
+        predict_kwargs: dict[str, Any] = {
+            "conf": self.confidence_threshold,
+            "device": self.device,
+            "verbose": False,
+        }
+        if self.runtime.amd_rocm_active and "cpu" not in str(self.device).lower():
+            predict_kwargs["half"] = True
+
+        result = self.model.predict(frame, **predict_kwargs)[0]
         if result.boxes is None:
             return []
 
@@ -222,13 +254,13 @@ class YOLODetector:
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
-    """Build the Phase 1 command-line interface."""
+    """Build the object detection command-line interface."""
     parser = argparse.ArgumentParser(description="Run YOLOv8 detection on a video.")
     parser.add_argument("input", type=Path, help="Path to an input video")
     parser.add_argument(
         "--output",
         type=Path,
-        default=PROJECT_ROOT / "reports" / "phase1_annotated.mp4",
+        default=PROJECT_ROOT / "reports" / "annotated_output.mp4",
         help="Destination for the annotated MP4 video",
     )
     parser.add_argument(

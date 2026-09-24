@@ -1,4 +1,4 @@
-"""Unit tests for Phase 1 detection utilities without downloading model weights."""
+"""Unit tests for detection utilities without downloading model weights."""
 
 from __future__ import annotations
 

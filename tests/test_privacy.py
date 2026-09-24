@@ -1,4 +1,4 @@
-"""Unit tests for Phase 14: Privacy-Aware Edge Architecture."""
+"""Unit tests for privacy-aware edge architecture."""
 
 import pytest
 from src.events import SecurityEvent

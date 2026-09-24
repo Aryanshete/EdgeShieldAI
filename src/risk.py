@@ -110,12 +110,13 @@ class RiskEngine:
 
     def evaluate_context(self, context: SecurityContext | dict[str, Any]) -> RiskAssessment:
         """Evaluate a SecurityContext instance or dictionary and return a RiskAssessment."""
-        if isinstance(context, SecurityContext):
+        if hasattr(context, "events"):
             event_tokens = set(context.events)
         elif isinstance(context, dict):
             event_tokens = set(context.get("events", []))
         else:
             raise TypeError(f"Expected SecurityContext or dict, got {type(context)}")
+
 
         score = 0
         factors: dict[str, int] = {}

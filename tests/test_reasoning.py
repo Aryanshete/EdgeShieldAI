@@ -1,4 +1,4 @@
-"""Unit tests for Phase 7 Llama 3.2 reasoning agent and fallback handling."""
+"""Unit tests for Llama 3.2 reasoning agent and fallback handling."""
 
 from __future__ import annotations
 

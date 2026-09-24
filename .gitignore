@@ -21,12 +21,14 @@ scratch/
 # Runtime output and large local video assets
 reports/*.json
 !reports/performance.json
+!reports/performance_amd.json
 reports/*.pdf
 reports/*.jpg
 reports/*.mp4
 videos/demo/*
 !videos/demo/.gitkeep
 models/*.pt
+models/*.onnx
 !models/.gitkeep
 
 # Keep local incident/event state out of version control, while retaining the

@@ -1,4 +1,4 @@
-"""Unit tests for Phase 8 Incident Manager, persistent storage, and report generation."""
+"""Unit tests for Incident Manager, persistent storage, and report generation."""
 
 from __future__ import annotations
 
@@ -147,3 +147,19 @@ def test_generate_html_and_text_reports(tmp_path: Path, sample_pipeline_data: tu
     assert "EDGESHIELD AI - SECURITY INCIDENT AUDIT REPORT" in text
     assert "INCIDENT ID:      INC-2026-001" in text
     assert "Server Room" in text
+    assert "SEVERITY LEVEL:   HIGH" in text
+    assert "85/100" in text
+
+
+def test_clear_incidents(tmp_path: Path, sample_pipeline_data: tuple[SecurityContext, RiskAssessment, ReasoningOutput]) -> None:
+    ctx, assessment, reasoning = sample_pipeline_data
+    file_path = tmp_path / "incidents_clear.json"
+    mgr = IncidentManager(storage_path=file_path)
+    mgr.create_incident(ctx, assessment, reasoning)
+    assert len(mgr.incidents) == 1
+    assert file_path.is_file()
+
+    mgr.clear_incidents()
+    assert len(mgr.incidents) == 0
+    reloaded = IncidentManager(storage_path=file_path)
+    assert len(reloaded.incidents) == 0

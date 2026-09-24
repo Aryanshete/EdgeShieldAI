@@ -1,4 +1,4 @@
-"""EdgeShield AI — Competition & Production Streamlit Application."""
+"""EdgeShield AI — Autonomous Edge Security Operations Platform."""
 
 from __future__ import annotations
 

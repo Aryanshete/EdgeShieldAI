@@ -1,4 +1,4 @@
-"""Unit tests for Phase 6 deterministic risk engine and heuristic scoring."""
+"""Unit tests for deterministic risk engine and heuristic scoring."""
 
 from __future__ import annotations
 

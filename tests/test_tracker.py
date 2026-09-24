@@ -1,4 +1,4 @@
-"""Unit tests for Phase 2 tracking utilities without model inference."""
+"""Unit tests for tracking utilities and state association."""
 
 from __future__ import annotations
 

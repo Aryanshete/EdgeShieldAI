@@ -1,4 +1,4 @@
-"""Unit tests for Phase 3 restricted zones and spatial analysis."""
+"""Unit tests for restricted zones and spatial geometry analysis."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import pytest
 
 from src.tracker import update_track_history
 from src.zones import (
+    ZONE_PRESETS,
     Zone,
     ZoneManager,
     draw_zones,
@@ -18,6 +19,7 @@ from src.zones import (
     is_restricted_zone,
     load_zones,
     point_inside_polygon,
+    scale_zones_to_frame,
 )
 
 
@@ -174,3 +176,43 @@ def test_track_history_records_zone_occupancy(sample_zone: Zone) -> None:
     assert zone_rec["zone_name"] == "Server Room"
     assert zone_rec["is_restricted"] is True
     assert zone_rec["timestamp_seconds"] == 3.5
+
+
+def test_zone_presets_validity() -> None:
+    expected_keys = {"server_room_demo", "outdoor_perimeter", "full_frame_secure", "dual_facility_split"}
+    assert expected_keys.issubset(ZONE_PRESETS.keys())
+
+    for key, preset in ZONE_PRESETS.items():
+        assert "title" in preset
+        assert "description" in preset
+        assert "zones" in preset
+        assert len(preset["zones"]) >= 1
+        for z in preset["zones"]:
+            assert isinstance(z, Zone)
+            assert len(z.polygon) >= 3
+            assert z.type in ("restricted", "monitored")
+
+
+def test_scale_zones_to_frame() -> None:
+    original = [
+        Zone(
+            id="test_zone",
+            name="Test",
+            type="restricted",
+            polygon=[[100, 200], [500, 200], [500, 600], [100, 600]],
+        )
+    ]
+
+    # Scaling 1280x720 to 1920x1080 (1.5x)
+    scaled = scale_zones_to_frame(original, frame_width=1920, frame_height=1080, ref_width=1280, ref_height=720)
+    assert len(scaled) == 1
+    assert scaled[0].polygon == [[150, 300], [750, 300], [750, 900], [150, 900]]
+
+    # Identity scaling
+    identity = scale_zones_to_frame(original, frame_width=1280, frame_height=720, ref_width=1280, ref_height=720)
+    assert identity[0].polygon == original[0].polygon
+
+    # Invalid dimension fallback
+    fallback = scale_zones_to_frame(original, frame_width=0, frame_height=0)
+    assert fallback[0].polygon == original[0].polygon
+

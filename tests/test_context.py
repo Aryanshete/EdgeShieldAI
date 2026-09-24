@@ -1,4 +1,4 @@
-"""Unit tests for Phase 5 temporal event analysis and context building."""
+"""Unit tests for temporal event analysis and context building."""
 
 from __future__ import annotations
 
@@ -130,7 +130,7 @@ def test_event_descriptions_contain_grounded_facts(
     assert ctx is not None
 
     descriptions = ctx.event_descriptions
-    # Rule 4 check: Grounded factual statements
+    # Verify grounded factual statements
     assert any("entered restricted zone" in desc for desc in descriptions)
     assert any("outside authorized hours" in desc for desc in descriptions)
     assert any("exited restricted zone" in desc for desc in descriptions)

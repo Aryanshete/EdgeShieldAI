@@ -232,7 +232,7 @@ class PipelineBenchmark:
 | **Peak Resident Memory Footprint** | **{metrics.memory_peak_mb} MB** | Lightweight edge deployment |
 
 ---
-*Note: Per Rule 3 of the EdgeShield specification, all metrics are recorded from direct hardware measurements. No synthetic or placeholder numbers are used.*
+*Note: All latency and throughput metrics are measured directly on local hardware without synthetic interpolation.*
 """
 
     def save_reports(

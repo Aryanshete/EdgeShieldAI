@@ -1,15 +1,51 @@
-# AMD-published ROCm 10 / PyTorch 2.13 image for Ubuntu 24.04 and Python 3.11.
-# Reconfirm this tag against AMD's current compatibility selector before a
-# production deployment.
-FROM rocm/pytorch:rocm10.0_ubuntu24.04_py3.11_pytorch_release_2.13.0
+# EdgeShield AI — Production AMD ROCm Cloud & Edge Container
+# Engineered for AMD Instinct™ (MI300/MI250) and AMD Radeon™ GPUs via ROCm HIP.
+
+ARG ROCM_VERSION=6.2
+ARG UBUNTU_VERSION=22.04
+ARG PYTORCH_VERSION=2.3.0
+
+FROM rocm/pytorch:rocm${ROCM_VERSION}_ubuntu${UBUNTU_VERSION}_py3.10_pytorch_${PYTORCH_VERSION}
+
+LABEL maintainer="EdgeShield AI Team"
+LABEL description="EdgeShield AI - Computer Vision & Reasoning Security Engine for AMD ROCm"
+
+# Avoid interactive apt prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV YOLO_CONFIG_DIR=/app
+
+# Install system dependencies for OpenCV and video codec acceleration
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libgomp1 \
+    ffmpeg \
+    pciutils \
+    lshw \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Install application dependencies
 COPY requirements-app.txt ./
-RUN pip install --no-cache-dir -r requirements-app.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements-app.txt
 
+# Copy source tree and model assets
 COPY . .
 
-# Validates the actual PyTorch/HIP runtime at container start. The deployment
-# command must pass the AMD GPU device, such as /dev/kfd on Linux.
-CMD ["python", "scripts/verify_rocm.py"]
+# Ensure verification and benchmark scripts are executable
+RUN chmod +x scripts/*.py scripts/*.sh 2>/dev/null || true
+
+# Expose Streamlit operations dashboard port
+EXPOSE 8501
+
+# Health check verifies PyTorch ROCm initialization
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "from src.runtime import get_runtime_status; s = get_runtime_status(); exit(0 if s.accelerator_available else 1)" || exit 1
+
+# Default: Launch EdgeShield AI SOC Dashboard
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

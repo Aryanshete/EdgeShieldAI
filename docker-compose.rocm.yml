@@ -1,0 +1,36 @@
+# EdgeShield AI — Docker Compose for AMD ROCm Hardware Passthrough
+# Usage:
+#   docker compose -f docker-compose.rocm.yml up --build
+
+services:
+  edgeshield-rocm:
+    build:
+      context: .
+      dockerfile: Dockerfile.rocm
+      args:
+        ROCM_VERSION: "6.2"
+        UBUNTU_VERSION: "22.04"
+        PYTORCH_VERSION: "2.3.0"
+    container_name: edgeshield_rocm_soc
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    devices:
+      # AMD Kernel Fusion Driver (compute)
+      - "/dev/kfd:/dev/kfd"
+      # Direct Rendering Infrastructure (graphics & display)
+      - "/dev/dri:/dev/dri"
+    group_add:
+      - video
+      - render
+    security_opt:
+      - seccomp:unconfined
+    ipc: host
+    environment:
+      - HIP_VISIBLE_DEVICES=0
+      - PYTORCH_ROCM_ARCH=native
+      - YOLO_CONFIG_DIR=/app
+    volumes:
+      - ./reports:/app/reports
+      - ./data:/app/data
+      - ./videos:/app/videos

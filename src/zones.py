@@ -48,6 +48,129 @@ class Zone:
         )
 
 
+ZONE_PRESETS: dict[str, dict[str, Any]] = {
+    "server_room_demo": {
+        "title": "Indoor Server Room Facility (Demo Video)",
+        "description": "Configured for indoor demonstration video (Server Room & Entry Corridor).",
+        "zones": [
+            Zone(
+                id="server_room",
+                name="Server Room",
+                type="restricted",
+                polygon=[[450, 300], [850, 300], [850, 720], [450, 720]],
+                color=(0, 0, 220),
+                authorized_hours={"start": "08:00", "end": "18:00"},
+                description="High-security server rack enclosure containing sensitive communications equipment.",
+            ),
+            Zone(
+                id="entry_corridor",
+                name="Entry Corridor",
+                type="monitored",
+                polygon=[[100, 300], [450, 300], [450, 720], [100, 720]],
+                color=(0, 180, 255),
+                authorized_hours={"start": "00:00", "end": "23:59"},
+                description="General access hallway connecting the outer corridor to the secure facility entry.",
+            ),
+        ],
+    },
+    "outdoor_perimeter": {
+        "title": "Outdoor Perimeter & Access Walkway (Night/Construction)",
+        "description": "Secures upper & central perimeter walkways, barrier fences, and access gates.",
+        "zones": [
+            Zone(
+                id="perimeter_walkway",
+                name="Secured Perimeter & Walkway",
+                type="restricted",
+                polygon=[[0, 50], [1280, 50], [1280, 580], [0, 580]],
+                color=(0, 0, 220),
+                authorized_hours={"start": "08:00", "end": "18:00"},
+                description="Outdoor perimeter boundary, construction fence, and access walkway.",
+            ),
+            Zone(
+                id="outer_staging",
+                name="Outer Transit Roadway",
+                type="monitored",
+                polygon=[[0, 580], [1280, 580], [1280, 720], [0, 720]],
+                color=(0, 180, 255),
+                authorized_hours={"start": "00:00", "end": "23:59"},
+                description="Outer transit staging and public access corridor.",
+            ),
+        ],
+    },
+    "full_frame_secure": {
+        "title": "Full-Scene Secure Perimeter (Universal — All Feeds)",
+        "description": "Monitors the entire camera view as a secured restricted perimeter.",
+        "zones": [
+            Zone(
+                id="full_facility_perimeter",
+                name="Full Secured Perimeter",
+                type="restricted",
+                polygon=[[0, 0], [1280, 0], [1280, 720], [0, 720]],
+                color=(0, 0, 220),
+                authorized_hours={"start": "08:00", "end": "18:00"},
+                description="Entire visual field monitored as an active high-security zone.",
+            ),
+        ],
+    },
+    "dual_facility_split": {
+        "title": "Dual Facility Split (Left Restricted / Right Monitored)",
+        "description": "Divides camera into secured access bay (left) and staging area (right).",
+        "zones": [
+            Zone(
+                id="secure_zone_left",
+                name="Restricted Bay (Left)",
+                type="restricted",
+                polygon=[[0, 0], [640, 0], [640, 720], [0, 720]],
+                color=(0, 0, 220),
+                authorized_hours={"start": "08:00", "end": "18:00"},
+                description="Secured left quadrant of the monitored facility.",
+            ),
+            Zone(
+                id="monitored_zone_right",
+                name="Monitored Staging (Right)",
+                type="monitored",
+                polygon=[[640, 0], [1280, 0], [1280, 720], [640, 720]],
+                color=(0, 180, 255),
+                authorized_hours={"start": "00:00", "end": "23:59"},
+                description="Monitored staging and transit area.",
+            ),
+        ],
+    },
+}
+
+
+def scale_zones_to_frame(
+    zones: Sequence[Zone],
+    frame_width: int,
+    frame_height: int,
+    ref_width: int = 1280,
+    ref_height: int = 720,
+) -> list[Zone]:
+    """Scale zone polygon coordinates to match actual video frame dimensions."""
+    if frame_width <= 0 or frame_height <= 0:
+        return list(zones)
+    if frame_width == ref_width and frame_height == ref_height:
+        return list(zones)
+
+    sx = frame_width / float(ref_width)
+    sy = frame_height / float(ref_height)
+    scaled: list[Zone] = []
+    for z in zones:
+        new_poly = [[int(pt[0] * sx), int(pt[1] * sy)] for pt in z.polygon]
+        scaled.append(
+            Zone(
+                id=z.id,
+                name=z.name,
+                type=z.type,
+                polygon=new_poly,
+                color=z.color,
+                authorized_hours=dict(z.authorized_hours),
+                description=z.description,
+            )
+        )
+    return scaled
+
+
 def point_inside_polygon(
     point: Sequence[int] | tuple[int, int],
     polygon: Sequence[Sequence[int]],
@@ -85,12 +208,13 @@ def point_inside_polygon(
 
 def is_restricted_zone(zone: Zone | dict[str, Any] | str) -> bool:
     """Check if a zone or zone type is designated as restricted."""
-    if isinstance(zone, Zone):
-        return zone.type.lower() == "restricted"
+    if hasattr(zone, "type"):
+        return str(zone.type).lower() == "restricted"
     if isinstance(zone, dict):
         return str(zone.get("type", "")).lower() == "restricted"
     if isinstance(zone, str):
         return zone.lower() == "restricted"
+
     return False
 
 

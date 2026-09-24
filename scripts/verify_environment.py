@@ -1,4 +1,4 @@
-"""Validate the Phase 0 Python runtime without loading model weights."""
+"""Validate the Python runtime and dependencies without loading model weights."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def main() -> int:
         print("\nInstall missing dependencies with: python -m pip install -r requirements.txt")
         return 1
 
-    print("\nPhase 0 environment verification passed.")
+    print("\nEnvironment verification passed successfully.")
     return 0
 
 

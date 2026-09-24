@@ -61,7 +61,7 @@ class PrivacyAuditor:
         self.policy = policy or PrivacyPolicy()
 
     def format_anonymous_label(self, track_id: int) -> str:
-        """Format an anonymous track identifier compliant with Phase 14 specifications.
+        """Format an anonymous track identifier compliant with enterprise privacy standards.
 
         Example: format_anonymous_label(7) -> 'Person #07'
         """
@@ -73,7 +73,7 @@ class PrivacyAuditor:
         Returns:
             dict with 'compliant': bool, 'violations': list[str], 'sanitized_event': dict.
         """
-        event_dict = event.as_dict() if isinstance(event, SecurityEvent) else dict(event)
+        event_dict = event.as_dict() if hasattr(event, "as_dict") else dict(event)
         violations: list[str] = []
 
         # Check top-level and metadata keys for disallowed biometric fields

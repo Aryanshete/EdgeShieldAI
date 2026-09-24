@@ -1,0 +1,78 @@
+active_profile: instinct_mi300
+environment:
+  HIP_VISIBLE_DEVICES: '0'
+  ROCR_VISIBLE_DEVICES: '0'
+  GPU_DEVICE_ORDINAL: '0'
+  PYTORCH_ROCM_ARCH: native
+  HSA_OVERRIDE_GFX_VERSION: ''
+  MIOPEN_FIND_MODE: FAST
+  MIOPEN_DEBUG_CONV_GEMM: '0'
+  HIP_LAUNCH_BLOCKING: '0'
+inference:
+  device: cuda:0
+  half_precision: true
+  batch_size: 1
+  warmup_frames: 5
+  memory_fraction: 0.85
+  allow_tf32: true
+profiles:
+  instinct_mi300:
+    name: "AMD Instinct\u2122 MI300X / MI300A"
+    architecture: "CDNA\u2122 3 (gfx942)"
+    hsa_override_gfx_version: 9.4.2
+    pytorch_rocm_arch: gfx942
+    half_precision: true
+    batch_size: 4
+    vram_target_gb: 192
+    miopen_find_mode: FAST
+    description: Data Center cluster inference with high throughput and CDNA3 matrix
+      cores
+  instinct_mi250:
+    name: "AMD Instinct\u2122 MI250X / MI250 / MI210"
+    architecture: "CDNA\u2122 2 (gfx90a)"
+    hsa_override_gfx_version: 9.0.a
+    pytorch_rocm_arch: gfx90a
+    half_precision: true
+    batch_size: 2
+    vram_target_gb: 128
+    miopen_find_mode: FAST
+    description: Enterprise cloud accelerator with dual GCD architecture
+  radeon_rx7900:
+    name: "AMD Radeon\u2122 RX 7900 XTX / 7900 XT / 7800 XT"
+    architecture: "RDNA\u2122 3 (gfx1100)"
+    hsa_override_gfx_version: 11.0.0
+    pytorch_rocm_arch: gfx1100
+    half_precision: true
+    batch_size: 1
+    vram_target_gb: 24
+    miopen_find_mode: FAST
+    description: High-end desktop / edge appliance with AI accelerator units
+  radeon_rx6000:
+    name: "AMD Radeon\u2122 RX 6900 XT / 6800 XT / 6700 XT"
+    architecture: "RDNA\u2122 2 (gfx1030)"
+    hsa_override_gfx_version: 10.3.0
+    pytorch_rocm_arch: gfx1030
+    half_precision: true
+    batch_size: 1
+    vram_target_gb: 16
+    miopen_find_mode: FAST
+    description: Workstation edge node with RDNA 2 compute units
+  ryzen_ai_npu:
+    name: "AMD Ryzen\u2122 AI (XDNA\u2122 / XDNA\u2122 2 NPU)"
+    architecture: "XDNA\u2122 Neural Processing Unit"
+    hsa_override_gfx_version: ''
+    pytorch_rocm_arch: ''
+    half_precision: false
+    onnx_execution_provider: VitisAIExecutionProvider
+    batch_size: 1
+    vram_target_gb: 0
+    description: Ultra-low power edge AI coprocessor (Ryzen AI 300 / 8040 / 7040)
+  cpu_fallback:
+    name: CPU Reference Baseline (Deterministic Fallback)
+    architecture: x86_64 Multicore
+    hsa_override_gfx_version: ''
+    pytorch_rocm_arch: ''
+    half_precision: false
+    batch_size: 1
+    vram_target_gb: 0
+    description: Host CPU reference without hardware acceleration

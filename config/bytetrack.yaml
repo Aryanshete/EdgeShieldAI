@@ -1,10 +1,10 @@
-# EdgeShield ByteTrack settings for a fixed-camera, single-person intrusion demo.
-# Keeping lost tracks longer and allowing lower-IoU re-association reduces
-# unnecessary ID changes when the person changes pose or scale.
+# EdgeShield ByteTrack settings for robust continuous tracking on indoor and outdoor surveillance feeds.
+# Optimized match_thresh prevents track fragmentation when subjects move or change scale.
 tracker_type: bytetrack
-track_high_thresh: 0.15
-track_low_thresh: 0.05
-new_track_thresh: 0.15
-track_buffer: 120
-match_thresh: 0.95
+track_high_thresh: 0.20
+track_low_thresh: 0.10
+new_track_thresh: 0.20
+track_buffer: 60
+match_thresh: 0.75
 fuse_score: true
+

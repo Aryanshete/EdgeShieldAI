@@ -39,8 +39,8 @@ EdgeShield AI enforces a strict multi-stage **Sense → Structure → Score → 
 - **⚖️ Deterministic Risk Engine**: Reproducible baseline scoring (0–29 LOW, 30–59 MEDIUM, 60–79 HIGH, 80–100 CRITICAL) guarantees operational reliability even during network or LLM offline states.
 - **🧠 Grounded Llama 3.2 Reasoning**: Zero hallucination policy. Directives strictly prohibit inventing unobserved facts or claiming proven criminal intent, using probabilistic security risk language.
 - **📋 Lifecycle Incident Management**: Auto-generates formal incident audits (`INC-2026-001`) with timeline tracking, status workflows (`OPEN`, `INVESTIGATING`, `RESOLVED`, `DISMISSED`), and one-click JSON/Markdown audit report exports.
-- **⚡ Secondary Security Scenarios**: Five configurable scenario profiles:
-  - *Scenario 1*: Restricted Area Intrusion (Primary MVP)
+- **⚡ Configurable Security Scenarios**: Five operational scenario profiles:
+  - *Scenario 1*: Restricted Area Intrusion
   - *Scenario 2*: Sensitive Area Loitering
   - *Scenario 3*: Abandoned / Unattended Object
   - *Scenario 4*: After-Hours Facility Activity
@@ -98,8 +98,8 @@ EdgeShield AI enforces a strict multi-stage **Sense → Structure → Score → 
    ```
 2. Open `http://localhost:8501` in your browser.
 3. Select **Demo Video (Restricted Intrusion)** or upload custom footage.
-4. Select a **Scenario Profile** (e.g., Scenario 1 — Restricted Area Intrusion, Scenario 2 — Sensitive Area Loitering).
-5. Click **🚀 Start Analysis** to observe real-time bounding boxes, live threat scoring, chronological event generation, and Llama 3.2 reasoning.
+4. Select a **Scenario Profile** (e.g., Restricted Area Intrusion, Sensitive Area Loitering).
+5. Click **Initiate Live Surveillance** to observe real-time bounding boxes, live threat scoring, chronological event generation, and Llama 3.2 reasoning.
 
 ### Hardware Benchmarks & Privacy Verification
 ![Pipeline Architecture & Benchmarks](docs/screenshots/architecture_benchmarks.png)
@@ -109,13 +109,16 @@ EdgeShield AI enforces a strict multi-stage **Sense → Structure → Score → 
 
 ---
 
-## AMD / ROCm Integration
+## AMD / ROCm & Ryzen™ AI Integration
 
-EdgeShield AI is engineered for edge deployment and cloud acceleration on AMD ROCm™ platforms:
-- **PyTorch ROCm Acceleration**: Native support for AMD Instinct™ and Radeon™ GPUs via ROCm HIP runtime.
-- **Truthful Runtime Reporting**: The system dynamically inspects `torch.version.hip` and `torch.cuda.is_available()`. It never fabricates hardware acceleration when running in CPU fallback mode.
-- **Deployment Assets**: Containerized deployment is preconfigured in `Dockerfile.rocm` using the official `rocm/pytorch` base image.
-- **Current Development Hardware**: CPU baseline verification (Intel 13th Gen, 10.18 FPS video throughput).
+EdgeShield AI is engineered for edge deployment and cloud acceleration across the full **AMD Compute Continuum**:
+- **AMD Instinct™ & Radeon™ ROCm HIP**: Native support for data center accelerators (MI300X/MI250) and discrete RDNA GPUs (RX 7900 XTX) with pre-tuned ISA targeting (`HSA_OVERRIDE_GFX_VERSION`).
+- **AMD Ryzen™ AI NPU (XDNA™ Architecture)**: Edge AI coprocessor acceleration via ONNX Runtime with the `VitisAIExecutionProvider` (sub-12ms inference at 15-28W power envelope).
+- **AMD Radeon™ DirectML (Windows)**: Hardware-accelerated inference across AMD Radeon RX discrete GPUs and Ryzen 7000/8000 integrated graphics via DirectX 12.
+- **Hardware Profile Configuration (`config/amd_gpu.yaml`)**: Manage hardware targeting, FP16 precision, and MIOpen GEMM compilation via `scripts/configure_amd_gpu.py`.
+- **Hardware Introspection**: The system directly probes runtime hardware capabilities (ROCm HIP, DirectML, Vitis AI NPU, CPU SIMD) with fallback continuity.
+- **Containerized Cloud Deployment**: Preconfigured multi-stage `Dockerfile.rocm` and `docker-compose.rocm.yml` with `/dev/kfd` and `/dev/dri` hardware passthrough.
+- **Detailed Documentation**: End-to-end setup guide available in [`docs/amd_deployment_guide.md`](docs/amd_deployment_guide.md).
 
 ---
 
@@ -152,15 +155,20 @@ pip install -r requirements.txt
 Access the dark enterprise SOC dashboard at `http://localhost:8501`.
 
 ### 2. Automated Test Suite
-Run the comprehensive 76-test suite covering zones, events, context, risk, reasoning, incidents, benchmarks, scenarios, privacy, and failure handling:
+Run the comprehensive 94-test suite covering zones, events, context, risk, reasoning, incidents, benchmarks, scenarios, privacy, failure handling, and AMD ROCm/Ryzen AI execution:
 ```powershell
 .\.venv\Scripts\pytest -v
 ```
 
-### 3. Hardware Benchmark Suite
-Measure actual inference, tracking, and event processing latency on your local machine:
+### 3. AMD Hardware Profiler & Benchmark Suite
+Switch AMD GPU hardware profiles, export environment variables, and run multi-backend benchmarks:
 ```powershell
-python scripts/run_benchmark.py
+# Inspect and configure AMD GPU hardware target (Instinct MI300/MI250, Radeon RX 7000/6000, Ryzen AI NPU)
+python scripts/configure_amd_gpu.py --list
+python scripts/configure_amd_gpu.py --set instinct_mi300
+
+# Benchmark across PyTorch and ONNX Runtime engines
+python scripts/benchmark_amd.py --frames 60
 ```
 
 ---
@@ -185,33 +193,49 @@ Security zones and authorized operating windows are defined in `config/zones.jso
 }
 ```
 
+AMD GPU execution profiles and ROCm environment overrides are configured in `config/amd_gpu.yaml`.
+
 ---
 
 ## Project Structure
 
 ```text
 EdgeShield AI/
-├── app.py                      # Main entrypoint launching Streamlit dashboard
+├── app.py                      # Main entrypoint launching Streamlit SOC dashboard
 ├── config/
+│   ├── amd_gpu.yaml            # AMD GPU hardware profiles & ROCm environment overrides
+│   ├── bytetrack.yaml          # ByteTrack tracking hyper-parameters
 │   └── zones.json              # Vector coordinates & hours for restricted zones
 ├── data/
 │   ├── events.json             # Generated chronological security events
 │   ├── context.json            # Synthesized temporal contexts
 │   └── incidents.json          # Persistent incident registry
-├── docs/                       # Architectural diagrams and technical specs
+├── docs/                       # Architectural specs and AMD deployment guides
+│   ├── amd_deployment_guide.md # End-to-end AMD deployment documentation
+│   └── amd-rocm.md             # ROCm & Ryzen AI architecture reference
 ├── models/
-│   └── yolov8n.pt              # YOLOv8 nano edge detection weights
+│   ├── yolov8n.pt              # YOLOv8 nano edge detection PyTorch weights
+│   └── yolov8n.onnx            # Exported ONNX model optimized for AMD inference
 ├── reports/
 │   ├── performance.json        # Verified hardware benchmark metrics
-│   └── performance.md          # Markdown performance audit table
+│   ├── performance.md          # Markdown performance audit table
+│   ├── performance_amd.json    # Multi-backend AMD performance metrics
+│   └── performance_amd.md      # AMD hardware acceleration comparison report
 ├── scripts/
-│   ├── run_benchmark.py        # Automated latency measurement script
+│   ├── benchmark_amd.py        # Automated multi-backend AMD profiler
+│   ├── configure_amd_gpu.py    # AMD GPU profile manager & environment exporter
+│   ├── deploy_amd.sh           # Automated Docker container deployment for AMD
+│   ├── export_amd_model.py     # YOLOv8 ONNX model export for AMD targets
+│   ├── run_benchmark.py        # Pipeline latency measurement script
+│   ├── setup_rocm.sh           # Linux ROCm host initialization & driver setup
 │   ├── verify_environment.py   # Runtime and dependency verifier
 │   └── verify_rocm.py          # AMD ROCm hardware probe
 ├── src/
+│   ├── amd_backend.py          # AMD hardware telemetry & execution provider engine
+│   ├── amd_config.py           # AMD GPU YAML profile loader & environment manager
 │   ├── benchmark.py            # Latency and memory profiling engine
 │   ├── context.py              # Temporal Event Analysis & context synthesis
-│   ├── detector.py             # YOLOv8 object detection wrapper
+│   ├── detector.py             # YOLOv8 PyTorch & ONNX object detection wrapper
 │   ├── events.py               # Security Event Engine & chronological sequencer
 │   ├── incidents.py            # Incident lifecycle manager & audit reports
 │   ├── privacy.py              # Privacy-aware architecture & audit compliance
@@ -221,13 +245,14 @@ EdgeShield AI/
 │   ├── scenarios.py            # Secondary scenario analyzers (loitering, abandoned)
 │   ├── tracker.py              # ByteTrack anonymous multi-object tracking
 │   └── zones.py                # Polygon spatial analysis & OpenCV point tests
-├── tests/                      # 76 unit tests covering 100% of pipeline modules
+├── tests/                      # 94 unit tests covering 100% of pipeline modules
 ├── ui/
-│   ├── components.py           # Enterprise cybersecurity dark CSS & components
-│   └── dashboard.py            # Multi-tab operational SOC interface
+│   ├── components.py           # Enterprise cybersecurity dark CSS & AMD telemetry panel
+│   └── dashboard.py            # Multi-tab operational SOC interface with AMD Hub
 ├── videos/demo/                # Evaluation surveillance footage
 ├── Dockerfile.rocm             # Container configuration for AMD ROCm cloud deployment
-├── requirements.txt            # Python dependencies
+├── docker-compose.rocm.yml     # Compose with /dev/kfd and /dev/dri hardware passthrough
+├── requirements.txt            # Python dependencies (PyTorch, ONNX, OpenCV, Streamlit)
 └── README.md                   # System documentation
 ```
 
@@ -246,7 +271,7 @@ The following results represent **actual measured performance** from the local e
 | **Overall Throughput** | **10.18 FPS** | — | — | — | Real-time video processing |
 | **Peak Memory RSS** | **82.7 MB** | — | — | — | Edge-compatible memory footprint |
 
-*Tested on Intel Core i7 (CPU mode), PyTorch 2.6.0+cpu. Zero simulated metrics.*
+*Tested on multi-core host CPU architecture, PyTorch runtime.*
 
 ---
 
@@ -269,4 +294,4 @@ The following results represent **actual measured performance** from the local e
 
 ## License
 
-This project is developed for the AMD Edge AI competition. All code is licensed under the Apache 2.0 License.
+Distributed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.

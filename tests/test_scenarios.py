@@ -1,4 +1,4 @@
-"""Unit tests for Phase 13: Secondary Security Scenarios (Loitering, Abandoned Object, Unusual Movement)."""
+"""Unit tests for secondary security scenarios (loitering, abandoned object, unusual movement)."""
 
 import pytest
 from src.context import ContextEngine, SecurityContext

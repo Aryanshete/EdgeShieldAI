@@ -56,7 +56,7 @@ class VideoTrackingSummary:
 
 
 def bottom_center(bbox: list[int]) -> list[int]:
-    """Return the ground-contact reference point used by the zone phase."""
+    """Return the ground-contact reference point used by spatial zone evaluation."""
     x1, _y1, x2, y2 = bbox
     return [(x1 + x2) // 2, y2]
 
@@ -106,6 +106,7 @@ class ObjectTracker:
         device: str | None = None,
         tracker_config: str | Path = PROJECT_ROOT / "config" / "bytetrack.yaml",
         person_only: bool = True,
+        classes: list[int] | None = None,
         zone_manager: ZoneManager | None = None,
         event_engine: EventEngine | None = None,
     ) -> None:
@@ -118,6 +119,7 @@ class ObjectTracker:
         )
         self.tracker_config = str(tracker_config)
         self.person_only = person_only
+        self.classes = classes
         self.zone_manager = zone_manager
         self.event_engine = event_engine
         self.track_history: TrackHistory = {}
@@ -140,7 +142,9 @@ class ObjectTracker:
             "device": self.detector.device,
             "verbose": False,
         }
-        if self.person_only:
+        if self.classes is not None:
+            arguments["classes"] = self.classes
+        elif self.person_only:
             arguments["classes"] = [0]
 
         result = self.detector.model.track(frame, **arguments)[0]
@@ -302,13 +306,13 @@ class ObjectTracker:
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
-    """Build the Phase 2/3/4 command-line interface."""
+    """Build the object tracking command-line interface."""
     parser = argparse.ArgumentParser(description="Track people across a video with ByteTrack.")
     parser.add_argument("input", type=Path, help="Path to an input video")
     parser.add_argument(
         "--output",
         type=Path,
-        default=PROJECT_ROOT / "reports" / "phase2_tracked.mp4",
+        default=PROJECT_ROOT / "reports" / "tracked_output.mp4",
         help="Destination for the annotated MP4 video",
     )
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL_PATH)

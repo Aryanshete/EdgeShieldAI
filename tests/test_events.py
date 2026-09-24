@@ -1,4 +1,4 @@
-"""Unit tests for Phase 4 event engine and security event generation."""
+"""Unit tests for event engine and security event generation."""
 
 from __future__ import annotations
 

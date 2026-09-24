@@ -83,11 +83,11 @@ def generate_deterministic_fallback(
 ) -> ReasoningOutput:
     """Generate a grounded, specification-compliant reasoning explanation without calling an external LLM.
 
-    Implements Phase 16 Failure Handling: ensures complete operational continuity
+    Implements resilient failure handling: ensures complete operational continuity
     if Llama 3.2 is offline, unconfigured, or returns malformed output.
     """
-    ctx_dict = context.as_dict() if isinstance(context, SecurityContext) else dict(context)
-    risk_dict = assessment.as_dict() if isinstance(assessment, RiskAssessment) else dict(assessment)
+    ctx_dict = context.as_dict() if hasattr(context, "as_dict") else dict(context)
+    risk_dict = assessment.as_dict() if hasattr(assessment, "as_dict") else dict(assessment)
 
     location = ctx_dict.get("location", "Monitored Area")
     authorized_hours = ctx_dict.get("authorized_hours", "08:00-18:00")
@@ -150,8 +150,8 @@ class LlamaReasoningAgent:
         assessment: RiskAssessment | dict[str, Any],
     ) -> str:
         """Format the input prompt matching the specification schema (PDF Page 18)."""
-        ctx_dict = context.as_dict() if isinstance(context, SecurityContext) else dict(context)
-        risk_dict = assessment.as_dict() if isinstance(assessment, RiskAssessment) else dict(assessment)
+        ctx_dict = context.as_dict() if hasattr(context, "as_dict") else dict(context)
+        risk_dict = assessment.as_dict() if hasattr(assessment, "as_dict") else dict(assessment)
 
         # Prioritize factual event descriptions over raw tokens
         events_payload = ctx_dict.get("event_descriptions") or ctx_dict.get("events", [])
