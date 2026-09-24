@@ -48,7 +48,7 @@ EdgeShield provides a pre-configured Docker image based on AMD's official ROCm P
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/aryan/EdgeShield-AI.git
+git clone https://github.com/Aryanshete/EdgeShieldAI
 cd "EdgeShield AI"
 
 # 2. Export optimized ONNX model

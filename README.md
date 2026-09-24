@@ -132,7 +132,7 @@ EdgeShield AI is engineered for edge deployment and cloud acceleration across th
 ### Setup
 ```powershell
 # Clone the repository
-git clone https://github.com/aryan/EdgeShield-AI.git
+git clone https://github.com/Aryanshete/EdgeShieldAI
 cd "EdgeShield AI"
 
 # Create and activate virtual environment
