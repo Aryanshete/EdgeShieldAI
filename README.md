@@ -85,42 +85,6 @@ EdgeShield AI enforces a strict multi-stage **Sense → Structure → Score → 
   [Edge Operations Dashboard] ── http://localhost:8501
 ```
 
----
-
-## Demo
-
-![EdgeShield AI Live Operations Dashboard](docs/screenshots/dashboard_live.png)
-
-### Live Streamlit Operations Interface
-1. Launch the Streamlit dashboard:
-   ```powershell
-   .\.venv\Scripts\streamlit run app.py
-   ```
-2. Open `http://localhost:8501` in your browser.
-3. Select **Demo Video (Restricted Intrusion)** or upload custom footage.
-4. Select a **Scenario Profile** (e.g., Restricted Area Intrusion, Sensitive Area Loitering).
-5. Click **Initiate Live Surveillance** to observe real-time bounding boxes, live threat scoring, chronological event generation, and Llama 3.2 reasoning.
-
-### Hardware Benchmarks & Privacy Verification
-![Pipeline Architecture & Benchmarks](docs/screenshots/architecture_benchmarks.png)
-
-### Incident Management & Audit Reports
-![Incidents & Audit Reports](docs/screenshots/incidents_audit.png)
-
----
-
-## AMD / ROCm & Ryzen™ AI Integration
-
-EdgeShield AI is engineered for edge deployment and cloud acceleration across the full **AMD Compute Continuum**:
-- **AMD Instinct™ & Radeon™ ROCm HIP**: Native support for data center accelerators (MI300X/MI250) and discrete RDNA GPUs (RX 7900 XTX) with pre-tuned ISA targeting (`HSA_OVERRIDE_GFX_VERSION`).
-- **AMD Ryzen™ AI NPU (XDNA™ Architecture)**: Edge AI coprocessor acceleration via ONNX Runtime with the `VitisAIExecutionProvider` (sub-12ms inference at 15-28W power envelope).
-- **AMD Radeon™ DirectML (Windows)**: Hardware-accelerated inference across AMD Radeon RX discrete GPUs and Ryzen 7000/8000 integrated graphics via DirectX 12.
-- **Hardware Profile Configuration (`config/amd_gpu.yaml`)**: Manage hardware targeting, FP16 precision, and MIOpen GEMM compilation via `scripts/configure_amd_gpu.py`.
-- **Hardware Introspection**: The system directly probes runtime hardware capabilities (ROCm HIP, DirectML, Vitis AI NPU, CPU SIMD) with fallback continuity.
-- **Containerized Cloud Deployment**: Preconfigured multi-stage `Dockerfile.rocm` and `docker-compose.rocm.yml` with `/dev/kfd` and `/dev/dri` hardware passthrough.
-- **Detailed Documentation**: End-to-end setup guide available in [`docs/amd_deployment_guide.md`](docs/amd_deployment_guide.md).
-
----
 
 ## Installation
 
